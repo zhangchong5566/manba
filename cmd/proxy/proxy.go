@@ -31,7 +31,7 @@ var (
 	defaultFilters = &filterFlag{}
 	filters        = &filterFlag{}
 
-	addr                          = flag.String("addr", "127.0.0.1:80", "Addr: http request entrypoint")
+	addr                          = flag.String("addr", "127.0.0.1:8011", "Addr: http request entrypoint")
 	addrHTTPS                     = flag.String("addr-https", "127.0.0.1:443", "Addr: https request entrypoint")
 	defaultTLSCert                = flag.String("default-tls-cert", "", "Default TLS cert file path")
 	defaultTLSKey                 = flag.String("default-tls-key", "", "Default TLS key file path")

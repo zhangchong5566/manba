@@ -34,7 +34,7 @@ services:
       - "3000:3000"
 
   etcd:
-    image: gcr.io/etcd-development/etcd
+    image: bitnami/etcd
     depends_on:
       - prometheus
     expose:
@@ -43,8 +43,9 @@ services:
       - "2379:2379"
     command:
       - etcd
-      - --listen-client-urls=http://0.0.0.0:2379
-      - --advertise-client-urls=http://0.0.0.0:2379
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
 
   apiserver:
     image: fagongzi/apiserver
@@ -52,10 +53,13 @@ services:
       - etcd
     expose:
       - 9093
+      - 9092
     ports:
       - "9093:9093"
+      - "9092:9092"
     command:
-      - manba-apiserver
+      - apiserver
+      - --addr=:9092
       - --addr-http=:9093
       - --addr-store=etcd://etcd:2379
 
@@ -65,12 +69,12 @@ services:
       - etcd
       - apiserver
     expose:
-      - 80
+      - 8011
     ports:
-      - "80:80"
+      - "8011:8011"
     command:
-      - manba-proxy
-      - --addr=:80
+      - proxy
+      - --addr=:8011
       - --addr-store=etcd://etcd:2379
       - --metric-job=proxy
       - --metric-address=pushgateway:9091

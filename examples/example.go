@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-
+	createCluster()
 }
 
 // 如果你的api server使用了"--discovery"参数启动

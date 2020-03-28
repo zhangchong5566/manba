@@ -9,11 +9,13 @@ import (
 func createCluster() error {
 	c, err := getClient()
 	if err != nil {
+		fmt.Errorf("getClient err=%+v", err)
 		return err
 	}
 
-	id, err := c.NewClusterBuilder().Name("cluster-01").Loadbalance(metapb.RoundRobin).Commit()
+	id, err := c.NewClusterBuilder().Name("cluster-02").Loadbalance(metapb.RoundRobin).Commit()
 	if err != nil {
+		fmt.Errorf("createCluster err=%+v", err)
 		return err
 	}
 
