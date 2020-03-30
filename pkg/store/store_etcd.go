@@ -7,16 +7,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/fagongzi/gateway/pkg/client"
-	pbutil "github.com/fagongzi/gateway/pkg/pb"
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/pb/rpcpb"
-	"github.com/fagongzi/gateway/pkg/plugin"
-	"github.com/fagongzi/gateway/pkg/route"
-	"github.com/fagongzi/gateway/pkg/util"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
 	"github.com/fagongzi/util/format"
+	"github.com/zhangchong5566/manba/pkg/client"
+	pbutil "github.com/zhangchong5566/manba/pkg/pb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/rpcpb"
+	"github.com/zhangchong5566/manba/pkg/plugin"
+	"github.com/zhangchong5566/manba/pkg/route"
+	"github.com/zhangchong5566/manba/pkg/util"
 	"golang.org/x/net/context"
 )
 
@@ -51,6 +51,7 @@ type EtcdStore struct {
 	proxiesDir       string
 	routingsDir      string
 	pluginsDir       string
+	protosetDir      string
 	appliedPluginDir string
 	idPath           string
 
@@ -75,6 +76,7 @@ func NewEtcdStore(etcdAddrs []string, prefix string, basicAuth BasicAuth) (Store
 		proxiesDir:         fmt.Sprintf("%s/proxies", prefix),
 		routingsDir:        fmt.Sprintf("%s/routings", prefix),
 		pluginsDir:         fmt.Sprintf("%s/plugins", prefix),
+		protosetDir:        fmt.Sprintf("%s/protosets", prefix),
 		appliedPluginDir:   fmt.Sprintf("%s/applied/plugins", prefix),
 		idPath:             fmt.Sprintf("%s/id", prefix),
 		watchMethodMapping: make(map[EvtSrc]func(EvtType, *mvccpb.KeyValue) *Evt),
@@ -1219,4 +1221,46 @@ func (e *EtcdStore) getClusterBindPrefix(id uint64) string {
 
 func (e *EtcdStore) getBindKey(bind *metapb.Bind) string {
 	return getKey(e.getClusterBindPrefix(bind.ClusterID), bind.ServerID)
+}
+
+
+// PutProtoSetFile add or update the server
+func (e *EtcdStore) PutProtoSetFile(value *metapb.ProtoSetFile) (uint64, error) {
+	e.Lock()
+	defer e.Unlock()
+
+	err := pbutil.ValidateProtosetFile(value)
+	if err != nil {
+		return 0, err
+	}
+
+	return e.putPB(e.protosetDir, value, func(id uint64) {
+		value.ID = id
+	})
+}
+
+
+// RemoveProtoSetFile remove the protoSetFile
+func (e *EtcdStore) RemoveProtoSetFile(id uint64) error {
+	e.Lock()
+	defer e.Unlock()
+
+	return e.delete(getKey(e.protosetDir, id))
+}
+
+// GetProtoSetFiles returns all protoset
+func (e *EtcdStore) GetProtoSetFiles(limit int64, fn func(interface{}) error) error {
+	e.RLock()
+	defer e.RUnlock()
+
+	return e.getValues(e.protosetDir, limit, func() pb { return &metapb.ProtoSetFile{} }, fn)
+}
+
+// GetProtoSetFile returns the protoSet file
+func (e *EtcdStore) GetProtoSetFile(id uint64) (*metapb.ProtoSetFile, error) {
+	e.RLock()
+	defer e.RUnlock()
+
+	value := &metapb.ProtoSetFile{}
+	return value, e.getPB(e.protosetDir, id, value)
 }

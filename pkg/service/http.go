@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/fagongzi/util/format"
 	"github.com/labstack/echo"
@@ -71,4 +72,24 @@ func limitQueryFactory(ctx echo.Context) (interface{}, error) {
 
 func emptyParamFactory(ctx echo.Context) (interface{}, error) {
 	return nil, nil
+}
+
+// NewFormBodyHTTPHandle returns a http handle JSON body
+func NewFormBodyHTTPHandle(factory func(ctx echo.Context) interface{}, handler func(interface{}) (*grpcx.JSONResult, error)) func(echo.Context) error {
+	return func(ctx echo.Context) error {
+		value := factory(ctx)
+		err := grpcx.ReadJSONFromBody(ctx, value)
+		if err != nil {
+			return ctx.JSON(http.StatusBadRequest, &grpcx.JSONResult{
+				Data: err.Error(),
+			})
+		}
+
+		result, err := handler(value)
+		if err != nil {
+			return ctx.NoContent(http.StatusInternalServerError)
+		}
+
+		return ctx.JSON(http.StatusOK, result)
+	}
 }

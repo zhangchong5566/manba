@@ -5,7 +5,7 @@ import (
 	"plugin"
 	"strings"
 
-	"github.com/fagongzi/gateway/pkg/filter"
+	"github.com/zhangchong5566/manba/pkg/filter"
 )
 
 var (

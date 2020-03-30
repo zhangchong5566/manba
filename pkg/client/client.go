@@ -4,10 +4,9 @@ import (
 	"io"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/pb/rpcpb"
-	"github.com/fagongzi/grpcx"
+	"github.com/zhangchong5566/manba/pkg"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/rpcpb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -60,18 +59,18 @@ func NewClient(timeout time.Duration, addrs ...string) (Client, error) {
 }
 
 // NewClientWithEtcdDiscovery returns a gateway client, using etcd service discovery
-func NewClientWithEtcdDiscovery(prefix string, timeout time.Duration, etcdAddrs ...string) (Client, error) {
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   etcdAddrs,
-		DialTimeout: time.Second * 10,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return newDiscoveryClient(grpcx.WithEtcdServiceDiscovery(prefix, cli),
-		grpcx.WithTimeout(timeout))
-}
+//func NewClientWithEtcdDiscovery(prefix string, timeout time.Duration, etcdAddrs ...string) (Client, error) {
+//	cli, err := clientv3.New(clientv3.Config{
+//		Endpoints:   etcdAddrs,
+//		DialTimeout: time.Second * 10,
+//	})
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return newDiscoveryClient(grpcx.WithEtcdServiceDiscovery(prefix, cli),
+//		grpcx.WithTimeout(timeout))
+//}
 
 type client struct {
 	clients *grpcx.GRPCClient

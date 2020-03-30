@@ -9,12 +9,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/expr"
-	"github.com/fagongzi/gateway/pkg/filter"
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/plugin"
-	"github.com/fagongzi/gateway/pkg/store"
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/expr"
+	"github.com/zhangchong5566/manba/pkg/filter"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/plugin"
+	"github.com/zhangchong5566/manba/pkg/store"
+	"github.com/zhangchong5566/manba/pkg/util"
 	"github.com/fagongzi/log"
 	"github.com/fagongzi/util/hack"
 	"github.com/fagongzi/util/task"
@@ -369,7 +369,7 @@ func (p *Proxy) doProxy(dn *dispatchNode, adjustH func(*proxyContext)) {
 	}
 
 	ctx := dn.ctx
-	svr := dn.dest
+	svr := dn.dest // Server
 	if nil == svr {
 		dn.err = ErrNoServer
 		dn.code = fasthttp.StatusServiceUnavailable
@@ -480,11 +480,16 @@ func (p *Proxy) doProxy(dn *dispatchNode, adjustH func(*proxyContext)) {
 			dn.idx,
 			times)
 
-		if !dn.api.isWebSocket() {
-			dn.setHost(forwardReq)
-			res, err = p.client.Do(forwardReq, svr.meta.Addr, dn.httpOption())
-		} else {
-			res, err = p.onWebsocket(c, svr.meta.Addr)
+		if svr.meta.Protocol == metapb.HTTP {
+			if !dn.api.isWebSocket() {
+				dn.setHost(forwardReq)
+				res, err = p.client.Do(forwardReq, svr.meta.Addr, dn.httpOption())
+			} else {
+				res, err = p.onWebsocket(c, svr.meta.Addr)
+			}
+		} else if svr.meta.Protocol == metapb.Grpc {
+
+
 		}
 		c.setEndAt(time.Now())
 

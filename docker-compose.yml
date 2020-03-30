@@ -80,3 +80,4 @@ services:
       - --metric-address=pushgateway:9091
       - --interval-metric-sync=5
       - --js
+      - --websocket

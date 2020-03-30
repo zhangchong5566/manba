@@ -3,7 +3,7 @@ package proxy
 import (
 	"bytes"
 
-	"github.com/fagongzi/gateway/pkg/filter"
+	"github.com/zhangchong5566/manba/pkg/filter"
 	"github.com/fagongzi/util/hack"
 )
 

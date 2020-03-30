@@ -4,7 +4,7 @@ import (
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fastrand"
 
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 )
 
 // RandBalance is rand loadBalance impl

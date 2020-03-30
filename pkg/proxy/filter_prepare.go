@@ -1,8 +1,8 @@
 package proxy
 
 import (
-	"github.com/fagongzi/gateway/pkg/filter"
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/filter"
+	"github.com/zhangchong5566/manba/pkg/util"
 )
 
 // PrepareFilter Must be in the first of the filter chain,

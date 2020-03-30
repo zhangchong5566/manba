@@ -1,7 +1,7 @@
 package proxy
 
 import (
-	"github.com/fagongzi/gateway/pkg/filter"
+	"github.com/zhangchong5566/manba/pkg/filter"
 )
 
 // Hop-by-hop headers. These are removed when sent to the backend.

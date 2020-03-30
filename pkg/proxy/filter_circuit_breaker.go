@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/filter"
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/filter"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 )
 
 var (

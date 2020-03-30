@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/fagongzi/log"
 	"github.com/fagongzi/util/format"
 	"github.com/fagongzi/util/protoc"
@@ -68,7 +68,9 @@ func (e *EtcdStore) doWatch() {
 					evtSrc = EventSrcPlugin
 				} else if strings.HasPrefix(key, e.appliedPluginDir) {
 					evtSrc = EventSrcApplyPlugin
-				} else {
+				} else if strings.HasPrefix(key, e.protosetDir) {
+					evtSrc = EventSrcProtoSetFile
+				}  else {
 					continue
 				}
 
@@ -201,6 +203,20 @@ func (e *EtcdStore) doWatchWithApplyPlugin(evtType EvtType, kv *mvccpb.KeyValue)
 	}
 }
 
+func (e *EtcdStore) doWatchWithProtoSetFile(evtType EvtType, kv *mvccpb.KeyValue) *Evt {
+	value := &metapb.ProtoSetFile{}
+	if len(kv.Value) > 0 {
+		protoc.MustUnmarshal(value, []byte(kv.Value))
+	}
+
+	return &Evt{
+		Src:   EventSrcProtoSetFile,
+		Type:  evtType,
+		Key:   strings.Replace(string(kv.Key), fmt.Sprintf("%s/", e.protosetDir), "", 1),
+		Value: value,
+	}
+}
+
 func (e *EtcdStore) init() {
 	e.watchMethodMapping[EventSrcBind] = e.doWatchWithBind
 	e.watchMethodMapping[EventSrcServer] = e.doWatchWithServer
@@ -210,4 +226,5 @@ func (e *EtcdStore) init() {
 	e.watchMethodMapping[EventSrcProxy] = e.doWatchWithProxy
 	e.watchMethodMapping[EventSrcPlugin] = e.doWatchWithPlugin
 	e.watchMethodMapping[EventSrcApplyPlugin] = e.doWatchWithApplyPlugin
+	e.watchMethodMapping[EventSrcProtoSetFile] = e.doWatchWithProtoSetFile
 }

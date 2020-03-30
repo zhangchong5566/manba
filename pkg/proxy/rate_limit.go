@@ -3,7 +3,7 @@ package proxy
 import (
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/juju/ratelimit"
 )
 

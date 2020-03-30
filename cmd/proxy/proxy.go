@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/proxy"
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/proxy"
+	"github.com/zhangchong5566/manba/pkg/util"
 	"github.com/fagongzi/log"
 )
 

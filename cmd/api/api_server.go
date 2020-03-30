@@ -3,21 +3,22 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/zhangchong5566/manba/grpcx"
+
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/util"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/fagongzi/gateway/pkg/pb/rpcpb"
-	"github.com/fagongzi/gateway/pkg/service"
-	"github.com/fagongzi/gateway/pkg/store"
-	"github.com/fagongzi/grpcx"
 	"github.com/fagongzi/log"
 	"github.com/labstack/echo"
+	"github.com/zhangchong5566/manba/pkg/pb/rpcpb"
+	"github.com/zhangchong5566/manba/pkg/service"
+	"github.com/zhangchong5566/manba/pkg/store"
+	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
 )
 
@@ -35,6 +36,7 @@ var (
 	ui             = flag.String("ui", "/app/manba/ui/dist", "The gateway ui dist dir.")
 	uiPrefix       = flag.String("ui-prefix", "/ui", "The gateway ui prefix path.")
 	version        = flag.Bool("version", false, "Show version info")
+	addrYos        = flag.String("addr-yos", "", "Addr: yos address")
 )
 
 func main() {
@@ -66,6 +68,12 @@ func main() {
 	}
 
 	service.Init(db)
+
+	//// 初始化 yos 客户端
+	//err = remote.InitYosClient(*addrYos)
+	//if err != nil {
+	//	log.Errorf("init yos client error, err: %+v\n", err)
+	//}
 
 	var opts []grpcx.ServerOption
 	if *discovery {

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/pb/rpcpb"
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/rpcpb"
+	"github.com/zhangchong5566/manba/pkg/util"
 )
 
 var (
@@ -60,6 +60,8 @@ const (
 	EventSrcPlugin = EvtSrc(6)
 	// EventSrcApplyPlugin apply plugin event
 	EventSrcApplyPlugin = EvtSrc(7)
+	// EventSrcProtoSetFile protosetFile event
+	EventSrcProtoSetFile = EvtSrc(8)
 )
 
 // Evt event
@@ -136,6 +138,11 @@ type Store interface {
 	GetPlugin(id uint64) (*metapb.Plugin, error)
 	ApplyPlugins(applied *metapb.AppliedPlugins) error
 	GetAppliedPlugins() (*metapb.AppliedPlugins, error)
+
+	PutProtoSetFile(svr *metapb.ProtoSetFile) (uint64, error)
+	RemoveProtoSetFile(id uint64) error
+	GetProtoSetFiles(limit int64, fn func(interface{}) error) error
+	GetProtoSetFile(id uint64) (*metapb.ProtoSetFile, error)
 
 	RegistryProxy(proxy *metapb.Proxy, ttl int64) error
 	GetProxies(limit int64, fn func(*metapb.Proxy) error) error

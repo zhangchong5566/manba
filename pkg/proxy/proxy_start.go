@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/util"
 	"github.com/fagongzi/log"
 	"github.com/soheilhy/cmux"
 	"github.com/valyala/fasthttp"

@@ -3,7 +3,7 @@ package store
 import (
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
+	"go.etcd.io/etcd/clientv3"
 	"github.com/fagongzi/log"
 	"golang.org/x/net/context"
 )

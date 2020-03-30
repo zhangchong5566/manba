@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/pb/rpcpb"
-	"github.com/fagongzi/gateway/pkg/store"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/rpcpb"
+	"github.com/zhangchong5566/manba/pkg/store"
 	"golang.org/x/net/context"
 )
 
@@ -476,3 +476,70 @@ func (s *metaService) SetID(ctx context.Context, req *rpcpb.SetIDReq) (*rpcpb.Se
 		return &rpcpb.SetIDRsp{}, nil
 	}
 }
+
+func (s *metaService) PutProtoSetFile(ctx context.Context, req *rpcpb.PutProtoSetFileReq) (*rpcpb.PutProtoSetFileRsp, error) {
+	select {
+	case <-ctx.Done():
+		return nil, errRPCCancel
+	default:
+		id, err := s.db.PutProtoSetFile(&req.ProtoSetFile)
+		if err != nil {
+			return nil, err
+		}
+
+		return &rpcpb.PutProtoSetFileRsp{
+			ID: id,
+		}, nil
+	}
+}
+
+func (s *metaService) RemoveProtoSetFile(ctx context.Context, req *rpcpb.RemoveProtoSetFileReq) (*rpcpb.RemoveProtoSetFileRsp, error) {
+	select {
+	case <-ctx.Done():
+		return nil, errRPCCancel
+	default:
+		err := s.db.RemoveProtoSetFile(req.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		return &rpcpb.RemoveProtoSetFileRsp{}, nil
+	}
+}
+
+func (s *metaService) GetProtoSetFile(ctx context.Context, req *rpcpb.GetProtoSetFileReq) (*rpcpb.GetProtoSetFileRsp, error) {
+	select {
+	case <-ctx.Done():
+		return nil, errRPCCancel
+	default:
+		value, err := s.db.GetProtoSetFile(req.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		return &rpcpb.GetProtoSetFileRsp{
+			ProtoSetFile: value,
+		}, nil
+	}
+}
+
+
+func (s *metaService) GetProtoSetFileList(req *rpcpb.GetProtoSetFileListReq, stream rpcpb.MetaService_GetProtoSetFileListServer) error {
+	for {
+		select {
+		case <-stream.Context().Done():
+			return errRPCCancel
+		default:
+			err := s.db.GetProtoSetFiles(limit, func(value interface{}) error {
+				return stream.Send(value.(*metapb.ProtoSetFile))
+			})
+
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+}
+

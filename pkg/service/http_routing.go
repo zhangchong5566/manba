@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/grpcx"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg"
 	"github.com/fagongzi/log"
 	"github.com/labstack/echo"
 )

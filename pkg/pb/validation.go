@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/fagongzi/gateway/pkg/expr"
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/plugin"
+	"github.com/zhangchong5566/manba/pkg/expr"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/plugin"
 )
 
 // ValidateRouting validate routing
@@ -102,6 +102,23 @@ func ValidatePlugin(value *metapb.Plugin) error {
 	_, err := plugin.NewRuntime(value)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ValidateProtosetFile validate ProtoSetFile
+func ValidateProtosetFile(value *metapb.ProtoSetFile) error {
+	if value.Name == "" {
+		return fmt.Errorf("missing server name")
+	}
+
+	if value.FileId == "" {
+		return fmt.Errorf("missing file id")
+	}
+
+	if value.Version == "" {
+		return fmt.Errorf("missing protoset version")
 	}
 
 	return nil

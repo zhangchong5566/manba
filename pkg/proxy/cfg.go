@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/util"
 )
 
 // Option proxy option

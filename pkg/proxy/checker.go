@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/store"
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/store"
+	"github.com/zhangchong5566/manba/pkg/util"
 	"github.com/fagongzi/log"
 	"github.com/valyala/fasthttp"
 )

@@ -3,9 +3,9 @@ package client
 import (
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/pb"
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/pb/rpcpb"
+	"github.com/zhangchong5566/manba/pkg/pb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/rpcpb"
 )
 
 // ServerBuilder server builder

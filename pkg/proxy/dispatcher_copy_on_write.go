@@ -1,8 +1,8 @@
 package proxy
 
 import (
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/route"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/route"
 )
 
 func (r *dispatcher) copyServers(exclude uint64) map[uint64]*serverRuntime {

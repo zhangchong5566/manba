@@ -3,7 +3,7 @@ package lb
 import (
 	"sync/atomic"
 
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/valyala/fasthttp"
 )
 

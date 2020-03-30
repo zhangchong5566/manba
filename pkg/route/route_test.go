@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 )
 
 func TestAddWithMethod(t *testing.T) {

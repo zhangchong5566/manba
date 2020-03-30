@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
-	"github.com/fagongzi/gateway/pkg/plugin"
-	"github.com/fagongzi/gateway/pkg/util"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/plugin"
+	"github.com/zhangchong5566/manba/pkg/util"
 	"github.com/fagongzi/log"
 )
 

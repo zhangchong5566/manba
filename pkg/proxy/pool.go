@@ -3,7 +3,7 @@ package proxy
 import (
 	"sync"
 
-	"github.com/fagongzi/gateway/pkg/expr"
+	"github.com/zhangchong5566/manba/pkg/expr"
 	"github.com/fagongzi/goetty"
 )
 

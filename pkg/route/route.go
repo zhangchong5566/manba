@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/fagongzi/gateway/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/fagongzi/log"
 	"github.com/fagongzi/util/hack"
 )

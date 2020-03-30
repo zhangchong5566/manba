@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/fagongzi/gateway/pkg/pb/rpcpb"
-	"github.com/fagongzi/gateway/pkg/store"
+	"github.com/zhangchong5566/manba/pkg/pb/rpcpb"
+	"github.com/zhangchong5566/manba/pkg/store"
 )
 
 var (

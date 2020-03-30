@@ -48,6 +48,11 @@ service MetaService {
     rpc ApplyPlugins      (ApplyPluginsReq)      returns (ApplyPluginsRsp)       {}
     rpc GetAppliedPlugins (GetAppliedPluginsReq) returns (GetAppliedPluginsRsp)  {}
 
+    rpc PutProtoSetFile         (PutProtoSetFileReq)         returns (PutProtoSetFileRsp)          {}
+    rpc RemoveProtoSetFile      (RemoveProtoSetFileReq)      returns (RemoveProtoSetFileRsp)       {}
+    rpc GetProtoSetFile         (GetProtoSetFileReq)         returns (GetProtoSetFileRsp)          {}
+    rpc GetProtoSetFileList     (GetProtoSetFileListReq)     returns (stream metapb.ProtoSetFile)  {}
+
     rpc Clean             (CleanReq)             returns (CleanRsp)              {}
     rpc SetID             (SetIDReq)             returns (SetIDRsp)              {}
     rpc Batch             (BatchReq)             returns (BatchRsp)              {}
@@ -273,6 +278,39 @@ message GetAppliedPluginsReq {
 message GetAppliedPluginsRsp {
     optional RpcHeader             header  = 1 [(gogoproto.nullable) = false];
     optional metapb.AppliedPlugins applied = 2;
+}
+
+message PutProtoSetFileReq {
+    optional RpcHeader      header  = 1 [(gogoproto.nullable) = false];
+    optional metapb.ProtoSetFile  ProtoSetFile  = 2 [(gogoproto.nullable) = false];
+}
+
+message PutProtoSetFileRsp {
+    optional RpcHeader header  = 1 [(gogoproto.nullable) = false];
+    optional uint64    id      = 2 [(gogoproto.nullable) = false, (gogoproto.customname) = "ID"];
+}
+
+message RemoveProtoSetFileReq {
+    optional RpcHeader header  = 1 [(gogoproto.nullable) = false];
+    optional uint64    id      = 2 [(gogoproto.nullable) = false, (gogoproto.customname) = "ID"];
+}
+
+message RemoveProtoSetFileRsp {
+    optional RpcHeader header  = 1 [(gogoproto.nullable) = false];
+}
+
+message GetProtoSetFileReq {
+    optional RpcHeader header  = 1 [(gogoproto.nullable) = false];
+    optional uint64    id      = 2 [(gogoproto.nullable) = false, (gogoproto.customname) = "ID"];
+}
+
+message GetProtoSetFileRsp {
+    optional RpcHeader      header = 1 [(gogoproto.nullable) = false];
+    optional metapb.ProtoSetFile  ProtoSetFile = 2 [(gogoproto.nullable) = true];
+}
+
+message GetProtoSetFileListReq {
+    optional RpcHeader header  = 1 [(gogoproto.nullable) = false];
 }
 
 message CleanReq {
