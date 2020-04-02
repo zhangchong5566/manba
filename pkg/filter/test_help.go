@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/valyala/fasthttp"
 	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/zhangchong5566/manba/pkg/util"
-	"github.com/valyala/fasthttp"
 )
 
 // TestContext the context for test

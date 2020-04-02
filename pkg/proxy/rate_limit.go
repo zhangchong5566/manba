@@ -3,8 +3,8 @@ package proxy
 import (
 	"time"
 
-	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/juju/ratelimit"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 )
 
 type rateLimiter struct {

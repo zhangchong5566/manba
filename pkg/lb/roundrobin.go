@@ -3,8 +3,8 @@ package lb
 import (
 	"sync/atomic"
 
-	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/valyala/fasthttp"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 )
 
 // RoundRobin round robin loadBalance impl

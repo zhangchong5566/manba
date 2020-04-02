@@ -1,11 +1,15 @@
 package service
 
 import (
+	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/fagongzi/log"
 	"github.com/labstack/echo"
 	"github.com/zhangchong5566/manba/grpcx"
 	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/remote"
 	"github.com/zhangchong5566/manba/pkg/util"
 	"io"
 	"os"
@@ -13,14 +17,14 @@ import (
 	"time"
 )
 
-func initProtoSetFileRouter(protoset *echo.Group) {
-	protoset.GET("/protosets/:id",
+func initProtoSetFileRouter(server *echo.Group) {
+	server.GET("/protosets/:id",
 		grpcx.NewGetHTTPHandle(idParamFactory, getProtoSetFileHandler))
-	protoset.DELETE("/protosets/:id",
+	server.DELETE("/protosets/:id",
 		grpcx.NewGetHTTPHandle(idParamFactory, deleteProtoSetFileHandler))
-	protoset.PUT("/protosets",
+	server.PUT("/protosets",
 		NewFormBodyHTTPHandle(putProtoSetFileFactory, postProtoSetFileHandler))
-	protoset.GET("/protosets",
+	server.GET("/protosets",
 		grpcx.NewGetHTTPHandle(limitQueryFactory, listProtoSetFileHandler))
 }
 
@@ -80,11 +84,13 @@ func putProtoSetFileFactory(c echo.Context) interface{} {
 
 	file, err := c.FormFile("file")
 	if err != nil {
+		log.Errorf("上传文件时，获取文件错误 error, errors:%+v", err)
 		return err
 	}
 
 	src, err := file.Open()
 	if err != nil {
+		log.Errorf("打开文件错误 error, errors:%+v", err)
 		return err
 	}
 	defer src.Close()
@@ -118,13 +124,24 @@ func putProtoSetFileFactory(c echo.Context) interface{} {
 	}
 
 	// 上传到yos
+	yosFileId, err := remote.UploadFile(context.Background(), filePath, "", file.Filename, false)
+	if err != nil {
+		log.Errorf("putProtoSetFileFactory  remote.UploadFile error, err=%v, fileName=%v", err, file.Filename)
+		return nil
+	}
 
-
+	// 计算文件Md5值
+	md5 := md5.New()
+	io.Copy(md5, src)
+	MD5Str := hex.EncodeToString(md5.Sum(nil))
 
 	protoSetFile := &metapb.ProtoSetFile{
 		Name:     name,
 		Version:  version,
 		FileName: file.Filename,
+		FileId:   yosFileId,
+		FileMd5:  MD5Str,
+		CreateAt: util.NowWithMillisecond(),
 	}
 
 	return protoSetFile

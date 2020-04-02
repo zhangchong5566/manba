@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/fagongzi/log"
 	"github.com/valyala/fasthttp"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 )
 
 func (p *Proxy) enableHTTPS() bool {

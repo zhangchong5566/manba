@@ -1,21 +1,24 @@
 package proxy
 
 import (
+	"github.com/zhangchong5566/manba/pkg/grpcall"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"sync"
 	"time"
 
 	"github.com/zhangchong5566/manba/pkg/plugin"
 
-	"github.com/zhangchong5566/manba/pkg/expr"
-	"github.com/zhangchong5566/manba/pkg/pb/metapb"
-	"github.com/zhangchong5566/manba/pkg/route"
-	"github.com/zhangchong5566/manba/pkg/store"
-	"github.com/zhangchong5566/manba/pkg/util"
 	"github.com/fagongzi/goetty"
 	"github.com/fagongzi/log"
 	"github.com/fagongzi/util/hack"
 	"github.com/fagongzi/util/task"
 	"github.com/valyala/fasthttp"
+	"github.com/zhangchong5566/manba/pkg/expr"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/route"
+	"github.com/zhangchong5566/manba/pkg/store"
+	"github.com/zhangchong5566/manba/pkg/util"
 )
 
 type copyReq struct {
@@ -198,6 +201,7 @@ type dispatcher struct {
 	routings       map[uint64]*routingRuntime
 	route          *route.Route
 	apis           map[uint64]*apiRuntime
+	protoSetFiles  map[uint64]*protoSetFileRuntime
 	clusters       map[uint64]*clusterRuntime
 	servers        map[uint64]*serverRuntime
 	binds          map[uint64]*binds
@@ -208,6 +212,7 @@ type dispatcher struct {
 	checkerC       chan uint64
 	watchStopC     chan bool
 	watchEventC    chan *store.Evt
+	grpcEnter      *grpcall.EngineHandler
 	analysiser     *util.Analysis
 	store          store.Store
 	httpClient     *util.FastHTTPClient
@@ -217,25 +222,32 @@ type dispatcher struct {
 
 func newDispatcher(cnf *Cfg, db store.Store, runner *task.Runner, jsEngineFunc func(*plugin.Engine)) *dispatcher {
 	tw := goetty.NewTimeoutWheel(goetty.WithTickInterval(time.Second))
+
+	var handler = &DefaultEventHandler{}
+	grpcEnter, _ := grpcall.New(
+		grpcall.SetHookHandler(handler),
+	)
 	rt := &dispatcher{
-		cnf:          cnf,
-		tw:           tw,
-		store:        db,
-		runner:       runner,
-		analysiser:   util.NewAnalysis(tw),
-		httpClient:   util.NewFastHTTPClient(),
-		clusters:     make(map[uint64]*clusterRuntime),
-		servers:      make(map[uint64]*serverRuntime),
-		route:        route.NewRoute(),
-		apis:         make(map[uint64]*apiRuntime),
-		routings:     make(map[uint64]*routingRuntime),
-		binds:        make(map[uint64]*binds),
-		proxies:      make(map[string]*metapb.Proxy),
-		plugins:      make(map[uint64]*metapb.Plugin),
-		jsEngineFunc: jsEngineFunc,
-		checkerC:     make(chan uint64, 1024),
-		watchStopC:   make(chan bool),
-		watchEventC:  make(chan *store.Evt),
+		cnf:           cnf,
+		tw:            tw,
+		store:         db,
+		runner:        runner,
+		analysiser:    util.NewAnalysis(tw),
+		httpClient:    util.NewFastHTTPClient(),
+		clusters:      make(map[uint64]*clusterRuntime),
+		servers:       make(map[uint64]*serverRuntime),
+		route:         route.NewRoute(),
+		apis:          make(map[uint64]*apiRuntime),
+		protoSetFiles: make(map[uint64]*protoSetFileRuntime),
+		routings:      make(map[uint64]*routingRuntime),
+		binds:         make(map[uint64]*binds),
+		proxies:       make(map[string]*metapb.Proxy),
+		plugins:       make(map[uint64]*metapb.Plugin),
+		jsEngineFunc:  jsEngineFunc,
+		checkerC:      make(chan uint64, 1024),
+		watchStopC:    make(chan bool),
+		watchEventC:   make(chan *store.Evt),
+		grpcEnter:     grpcEnter,
 	}
 
 	rt.readyToHeathChecker()
@@ -321,4 +333,17 @@ func (r *dispatcher) selectServerFromCluster(ctx *fasthttp.RequestCtx, id uint64
 	}
 
 	return nil
+}
+
+type DefaultEventHandler struct {
+	sendChan chan []byte
+}
+
+func (h *DefaultEventHandler) OnReceiveData(md metadata.MD, resp string, respErr error) {
+	log.Infof("OnReceiveData: md=%+v, rep=%+v, err=%v\n", md, resp, respErr)
+
+}
+
+func (h *DefaultEventHandler) OnReceiveTrailers(stat *status.Status, md metadata.MD) {
+	log.Infof("OnReceiveTrailers: stat=%+v, md=%+v\n", stat, md)
 }

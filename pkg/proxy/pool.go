@@ -3,14 +3,14 @@ package proxy
 import (
 	"sync"
 
-	"github.com/zhangchong5566/manba/pkg/expr"
 	"github.com/fagongzi/goetty"
+	"github.com/zhangchong5566/manba/pkg/expr"
 )
 
 var (
 	renderPool       sync.Pool
 	contextPool      sync.Pool
-	dispatchNodePool  sync.Pool
+	dispatchNodePool sync.Pool
 	multiContextPool sync.Pool
 	wgPool           sync.Pool
 	exprCtxPool      sync.Pool

@@ -523,7 +523,6 @@ func (s *metaService) GetProtoSetFile(ctx context.Context, req *rpcpb.GetProtoSe
 	}
 }
 
-
 func (s *metaService) GetProtoSetFileList(req *rpcpb.GetProtoSetFileListReq, stream rpcpb.MetaService_GetProtoSetFileListServer) error {
 	for {
 		select {
@@ -542,4 +541,3 @@ func (s *metaService) GetProtoSetFileList(req *rpcpb.GetProtoSetFileListReq, str
 		}
 	}
 }
-

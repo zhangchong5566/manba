@@ -3,10 +3,10 @@ package proxy
 import (
 	"math"
 
-	"github.com/zhangchong5566/manba/pkg/pb/metapb"
-	"github.com/zhangchong5566/manba/pkg/store"
 	"github.com/fagongzi/log"
 	"github.com/fagongzi/util/format"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/store"
 )
 
 var (
@@ -48,6 +48,8 @@ func (r *dispatcher) readyToReceiveWatchEvent() {
 			r.doPluginEvent(evt)
 		} else if evt.Src == store.EventSrcApplyPlugin {
 			r.doApplyPluginEvent(evt)
+		} else if evt.Src == store.EventSrcProtoSetFile {
+			r.doProtosetFileEvent(evt)
 		} else if evt.Src == eventSrcStatusChanged {
 			r.doStatusChangedEvent(evt)
 		} else {
@@ -181,4 +183,17 @@ func (r *dispatcher) doStatusChangedEvent(evt *store.Evt) {
 
 	r.binds = newValues
 	log.Infof("server <%d> changed to %s", value.meta.ID, value.status.String())
+}
+
+
+func (r *dispatcher) doProtosetFileEvent(evt *store.Evt) {
+	protoSet, _ := evt.Value.(*metapb.ProtoSetFile)
+
+	if evt.Type == store.EventTypeNew {
+		r.addProtoSetFile(protoSet)
+	} else if evt.Type == store.EventTypeDelete {
+		r.removeProtoSetFile(format.MustParseStrUInt64(evt.Key))
+	} else if evt.Type == store.EventTypeUpdate {
+		r.updateProtoSetFile(protoSet)
+	}
 }

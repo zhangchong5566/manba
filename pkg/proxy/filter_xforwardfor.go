@@ -3,8 +3,8 @@ package proxy
 import (
 	"bytes"
 
-	"github.com/zhangchong5566/manba/pkg/filter"
 	"github.com/fagongzi/util/hack"
+	"github.com/zhangchong5566/manba/pkg/filter"
 )
 
 var (

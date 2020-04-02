@@ -36,7 +36,7 @@ fi
 
 if [ "${INPUT_CMD}" = 'apiserver' ]
 then
-    EXEC="apiserver --addr=${DEFAULT_IP}:9092 --addr-http=${DEFAULT_IP}:9093 --discovery $API_SERVER_OPTS"
+    EXEC="manba-apiserver --addr=${DEFAULT_IP}:9094 --addr-http=${DEFAULT_IP}:9093 --discovery $API_SERVER_OPTS"
 fi
 
 if [ "${INPUT_CMD}" = 'etcd' ]

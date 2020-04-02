@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/zhangchong5566/manba/grpcx"
 	"net/http"
 
 	"github.com/fagongzi/util/format"
@@ -22,7 +23,9 @@ func InitHTTPRouter(server *echo.Echo, ui, uiPrefix string) {
 	initAPIRouter(versionGroup)
 	initPluginRouter(versionGroup)
 	initSystemRouter(versionGroup)
+	initProtoSetFileRouter(versionGroup)
 	initStatic(server, ui, uiPrefix)
+
 }
 
 type limitQuery struct {

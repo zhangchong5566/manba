@@ -12,6 +12,10 @@ Server地址，格式为："IP:PORT"。
 ## Protocol
 Server的接口协议，目前支持HTTP。
 
+## GrpcService
+proto文件中定义的包名与RPC服务名，格式：包名.服务名  
+例如: `vippb.VipServer`, `bizlicpb.BizlicService`
+
 ## Weight
 Weight 服务器的权重（当该服务器所属的集群负载方式是权重轮询时则需要配置）
 

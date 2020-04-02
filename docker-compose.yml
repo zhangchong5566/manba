@@ -49,35 +49,39 @@ services:
 
   apiserver:
     image: fagongzi/apiserver
-    depends_on:
-      - etcd
+    #depends_on:
+      #- etcd
     expose:
       - 9093
       - 9092
     ports:
       - "9093:9093"
       - "9092:9092"
+    volumes:
+      - /Users/yunzhanghu_bj537/Work/gowork/src/github.com/zhangchong5566/gateway-ui-vue:/app/manba/ui
     command:
-      - apiserver
+      - manba-apiserver
       - --addr=:9092
       - --addr-http=:9093
-      - --addr-store=etcd://etcd:2379
+      - --addr-store=etcd://172.16.3.13:2379
+      - --addr-yos=172.16.3.13:6058
 
   proxy:
     image: fagongzi/proxy
     depends_on:
-      - etcd
+#      - etcd
       - apiserver
     expose:
       - 8011
     ports:
       - "8011:8011"
     command:
-      - proxy
+      - manba-proxy
       - --addr=:8011
-      - --addr-store=etcd://etcd:2379
+      - --addr-store=etcd://172.16.3.13:2379
       - --metric-job=proxy
       - --metric-address=pushgateway:9091
       - --interval-metric-sync=5
       - --js
       - --websocket
+      - --addr-yos=172.16.3.13:6058

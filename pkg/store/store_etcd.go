@@ -7,8 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/mvcc/mvccpb"
 	"github.com/fagongzi/util/format"
 	"github.com/zhangchong5566/manba/pkg/client"
 	pbutil "github.com/zhangchong5566/manba/pkg/pb"
@@ -17,6 +15,8 @@ import (
 	"github.com/zhangchong5566/manba/pkg/plugin"
 	"github.com/zhangchong5566/manba/pkg/route"
 	"github.com/zhangchong5566/manba/pkg/util"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
 	"golang.org/x/net/context"
 )
 
@@ -281,6 +281,31 @@ func (e *EtcdStore) Batch(batch *rpcpb.BatchReq) (*rpcpb.BatchRsp, error) {
 		ops = append(ops, op)
 	}
 
+	err = e.putBatch(ops...)
+	if err != nil {
+		return nil, err
+	}
+
+	ops = make([]clientv3.Op, 0, len(batch.PutProtoSetFiles))
+	for _, req := range batch.PutProtoSetFiles {
+		value := &req.ProtoSetFile
+		err := pbutil.ValidateProtosetFile(value)
+		if err != nil {
+			return nil, err
+		}
+
+		op, err := e.putPBWithOp(e.protosetDir, value, func(id uint64) {
+			value.ID = id
+			rsp.PutProtoSetFiles = append(rsp.PutProtoSetFiles, &rpcpb.PutProtoSetFileRsp{
+				ID: id,
+			})
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		ops = append(ops, op)
+	}
 	err = e.putBatch(ops...)
 	if err != nil {
 		return nil, err
@@ -860,6 +885,35 @@ func (e *EtcdStore) BackupTo(to string) error {
 		}
 	}
 
+	// backup protosetFile
+	batch = &rpcpb.BatchReq{}
+	err = e.getValues(e.protosetDir, limit, func() pb { return &metapb.ProtoSetFile{} }, func(value interface{}) error {
+		batch.PutProtoSetFiles = append(batch.PutProtoSetFiles, &rpcpb.PutProtoSetFileReq{
+			ProtoSetFile: *value.(*metapb.ProtoSetFile),
+		})
+
+		if int64(len(batch.PutProtoSetFiles)) == limit {
+			_, err := targetC.Batch(batch)
+			if err != nil {
+				return err
+			}
+
+			batch = &rpcpb.BatchReq{}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if int64(len(batch.PutProtoSetFiles)) > 0 {
+		_, err := targetC.Batch(batch)
+		if err != nil {
+			return err
+		}
+	}
+
 	// backup plugin
 	batch = &rpcpb.BatchReq{}
 	err = e.getValues(e.pluginsDir, limit, func() pb { return &metapb.Plugin{} }, func(value interface{}) error {
@@ -1223,7 +1277,6 @@ func (e *EtcdStore) getBindKey(bind *metapb.Bind) string {
 	return getKey(e.getClusterBindPrefix(bind.ClusterID), bind.ServerID)
 }
 
-
 // PutProtoSetFile add or update the server
 func (e *EtcdStore) PutProtoSetFile(value *metapb.ProtoSetFile) (uint64, error) {
 	e.Lock()
@@ -1238,7 +1291,6 @@ func (e *EtcdStore) PutProtoSetFile(value *metapb.ProtoSetFile) (uint64, error) 
 		value.ID = id
 	})
 }
-
 
 // RemoveProtoSetFile remove the protoSetFile
 func (e *EtcdStore) RemoveProtoSetFile(id uint64) error {

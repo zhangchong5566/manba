@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/zhangchong5566/manba/pkg/pb/metapb"
-	"github.com/zhangchong5566/manba/pkg"
 	"github.com/fagongzi/log"
 	"github.com/labstack/echo"
+	"github.com/zhangchong5566/manba/grpcx"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 )
 
 func initAPIRouter(server *echo.Group) {

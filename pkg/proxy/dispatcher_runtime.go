@@ -11,15 +11,15 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/zhangchong5566/manba/pkg/expr"
-	"github.com/zhangchong5566/manba/pkg/lb"
-	"github.com/zhangchong5566/manba/pkg/pb/metapb"
-	"github.com/zhangchong5566/manba/pkg/util"
 	"github.com/fagongzi/goetty"
 	"github.com/fagongzi/log"
 	"github.com/fagongzi/util/hack"
 	pbutil "github.com/fagongzi/util/protoc"
 	"github.com/valyala/fasthttp"
+	"github.com/zhangchong5566/manba/pkg/expr"
+	"github.com/zhangchong5566/manba/pkg/lb"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"github.com/zhangchong5566/manba/pkg/util"
 )
 
 var (
@@ -698,4 +698,25 @@ func getPathValue(idx int, req *fasthttp.Request) string {
 
 func getFormValue(name string, req *fasthttp.Request) string {
 	return string(req.PostArgs().Peek(name))
+}
+
+
+type protoSetFileRuntime struct {
+	meta *metapb.ProtoSetFile
+}
+
+func newProtoSetFileRuntime(meta *metapb.ProtoSetFile) *protoSetFileRuntime {
+	return &protoSetFileRuntime{
+		meta: meta,
+	}
+}
+
+func (c *protoSetFileRuntime) clone() *protoSetFileRuntime {
+	meta := &metapb.ProtoSetFile{}
+	pbutil.MustUnmarshal(meta, pbutil.MustMarshal(c.meta))
+	return newProtoSetFileRuntime(meta)
+}
+
+func (c *protoSetFileRuntime) updateMeta(meta *metapb.ProtoSetFile) {
+	c.meta = meta
 }

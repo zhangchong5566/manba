@@ -41,6 +41,10 @@ URL匹配表达式，Manba使用该字段来匹配原始请求的URL。该字段
 * MatchAll `URLPattern` && (`Method` && `Domain`)
 * MatchAny `URLPattern` && (`Method` || `Domain`)
 
+## GrpcMethod
+后端Service为GRPC接口时，需填写接口的Method名称，例如`SignInUp`，`BindPhoneNO`
+
+
 ## Status
 API 状态枚举, 有2个值组成： `UP` 和 `Down`。只有`UP`状态才能生效。
 

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/mvcc/mvccpb"
-	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/fagongzi/log"
 	"github.com/fagongzi/util/format"
 	"github.com/fagongzi/util/protoc"
+	"github.com/zhangchong5566/manba/pkg/pb/metapb"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
 )
 
 // Watch watch event from etcd
@@ -70,7 +70,7 @@ func (e *EtcdStore) doWatch() {
 					evtSrc = EventSrcApplyPlugin
 				} else if strings.HasPrefix(key, e.protosetDir) {
 					evtSrc = EventSrcProtoSetFile
-				}  else {
+				} else {
 					continue
 				}
 

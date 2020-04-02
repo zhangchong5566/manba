@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/zhangchong5566/manba/pkg/util"
 	"github.com/fagongzi/log"
 	"github.com/soheilhy/cmux"
 	"github.com/valyala/fasthttp"
+	"github.com/zhangchong5566/manba/pkg/util"
 )
 
 // Start start proxy

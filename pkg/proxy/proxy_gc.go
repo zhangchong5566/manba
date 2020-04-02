@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/zhangchong5566/manba/pkg/plugin"
 	"github.com/fagongzi/log"
+	"github.com/zhangchong5566/manba/pkg/plugin"
 )
 
 func (p *Proxy) addGCJSEngine(value *plugin.Engine) {

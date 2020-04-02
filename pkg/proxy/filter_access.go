@@ -1,8 +1,8 @@
 package proxy
 
 import (
-	"github.com/zhangchong5566/manba/pkg/filter"
 	"github.com/fagongzi/log"
+	"github.com/zhangchong5566/manba/pkg/filter"
 )
 
 // AccessFilter record the http access log

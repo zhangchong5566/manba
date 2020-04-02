@@ -10,10 +10,12 @@ require (
 	github.com/fagongzi/goetty v0.0.0-20180427060148-8f06d410550f
 	github.com/fagongzi/log v0.0.0-20170831135209-9a647df25e0e
 	github.com/fagongzi/util v0.0.0-20180330021808-4acf02da76a9
+	github.com/fullstorydev/grpcurl v1.1.0
 	github.com/garyburd/redigo v0.0.0-20180228092057-a69d19351219
 	github.com/gogo/protobuf v1.2.0
 	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/websocket v1.4.0
+	github.com/jhump/protoreflect v1.1.0
 	github.com/juju/ratelimit v1.0.1
 	github.com/koding/websocketproxy v0.0.0-20180716164433-0fa3f994f6e7
 	github.com/labstack/echo v0.0.0-20180412143600-6d227dfea4d2
@@ -21,6 +23,7 @@ require (
 	github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
 	github.com/prometheus/common v0.2.0
 	github.com/robertkrimen/otto v0.0.0-20180617131154-15f95af6e78d
+	github.com/satori/go.uuid v1.2.0
 	github.com/soheilhy/cmux v0.1.4
 	github.com/stretchr/testify v1.3.0
 	github.com/ugorji/go/codec v0.0.0-20181209151446-772ced7fd4c2 // indirect

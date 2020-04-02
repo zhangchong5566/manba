@@ -3,8 +3,8 @@ package proxy
 import (
 	"errors"
 
-	"github.com/zhangchong5566/manba/pkg/filter"
 	"github.com/valyala/fasthttp"
+	"github.com/zhangchong5566/manba/pkg/filter"
 )
 
 var (

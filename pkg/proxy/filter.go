@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/fagongzi/log"
+	"github.com/valyala/fasthttp"
 	"github.com/zhangchong5566/manba/pkg/filter"
 	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/zhangchong5566/manba/pkg/util"
-	"github.com/fagongzi/log"
-	"github.com/valyala/fasthttp"
 )
 
 func (f *Proxy) doPreFilters(requestTag string, c filter.Context, filters ...filter.Filter) (filterName string, statusCode int, err error) {

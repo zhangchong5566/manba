@@ -82,3 +82,13 @@ func (r *dispatcher) copyBinds(exclude metapb.Bind) map[uint64]*binds {
 
 	return values
 }
+
+func (r *dispatcher) copyProtoSetFile(exclude uint64) map[uint64]*protoSetFileRuntime {
+	values := make(map[uint64]*protoSetFileRuntime)
+	for key, value := range r.protoSetFiles {
+		if key != exclude {
+			values[key] = value.clone()
+		}
+	}
+	return values
+}

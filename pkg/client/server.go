@@ -68,11 +68,26 @@ func (sb *ServerBuilder) Addr(addr string) *ServerBuilder {
 	return sb
 }
 
+// GrpcService set grpcService
+func (sb *ServerBuilder) GrpcService(grpcService string) *ServerBuilder {
+	sb.value.GrpcService = grpcService
+	return sb
+}
+
+
 // HTTPBackend set backend is http backend
 func (sb *ServerBuilder) HTTPBackend() *ServerBuilder {
 	sb.value.Protocol = metapb.HTTP
 	return sb
 }
+
+
+// GRPCBackend set backend is grpc backend
+func (sb *ServerBuilder) GRPCBackend() *ServerBuilder {
+	sb.value.Protocol = metapb.Grpc
+	return sb
+}
+
 
 // MaxQPS set max qps
 func (sb *ServerBuilder) MaxQPS(max int64) *ServerBuilder {

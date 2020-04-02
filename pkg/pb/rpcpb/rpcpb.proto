@@ -20,22 +20,22 @@ service MetaService {
     rpc RemoveCluster     (RemoveClusterReq)     returns (RemoveClusterRsp)      {}
     rpc GetCluster        (GetClusterReq)        returns (GetClusterRsp)         {}
     rpc GetClusterList    (GetClusterListReq)    returns (stream metapb.Cluster) {}
-      
+
     rpc PutServer         (PutServerReq)         returns (PutServerRsp)          {}
     rpc RemoveServer      (RemoveServerReq)      returns (RemoveServerRsp)       {}
     rpc GetServer         (GetServerReq)         returns (GetServerRsp)          {}
     rpc GetServerList     (GetServerListReq)     returns (stream metapb.Server)  {}
-      
+
     rpc PutAPI            (PutAPIReq)            returns (PutAPIRsp)             {}
     rpc RemoveAPI         (RemoveAPIReq)         returns (RemoveAPIRsp)          {}
     rpc GetAPI            (GetAPIReq)            returns (GetAPIRsp)             {}
     rpc GetAPIList        (GetAPIListReq)        returns (stream metapb.API)     {}
-      
+
     rpc PutRouting        (PutRoutingReq)        returns (PutRoutingRsp)         {}
     rpc RemoveRouting     (RemoveRoutingReq)     returns (RemoveRoutingRsp)      {}
     rpc GetRouting        (GetRoutingReq)        returns (GetRoutingRsp)         {}
     rpc GetRoutingList    (GetRoutingListReq)    returns (stream metapb.Routing) {}
-      
+
     rpc AddBind           (AddBindReq)           returns (AddBindRsp)            {}
     rpc RemoveBind        (RemoveBindReq)        returns (RemoveBindRsp)         {}
     rpc RemoveClusterBind (RemoveClusterBindReq) returns (RemoveClusterBindRsp)  {}
@@ -345,6 +345,8 @@ message BatchReq {
     repeated PutPluginReq     putPlugins     = 12;
     repeated RemovePluginReq  removePlugins  = 13;
     optional ApplyPluginsReq  applyPlugins   = 14;
+    repeated PutProtoSetFileReq    putProtoSetFiles    = 15;
+    repeated RemoveProtoSetFileReq removeProtoSetFiles = 16;
 }
 
 message BatchRsp {
@@ -362,4 +364,6 @@ message BatchRsp {
     repeated PutPluginRsp     putPlugins     = 12;
     repeated RemovePluginRsp  removePlugins  = 13;
     optional ApplyPluginsRsp  applyPlugins   = 14;
+    repeated PutProtoSetFileRsp    putProtoSetFiles    = 15;
+    repeated RemoveProtoSetFileRsp removeProtoSetFiles = 16;
 }

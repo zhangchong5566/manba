@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/zhangchong5566/manba/pkg/remote"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -11,9 +12,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/fagongzi/log"
 	"github.com/zhangchong5566/manba/pkg/proxy"
 	"github.com/zhangchong5566/manba/pkg/util"
-	"github.com/fagongzi/log"
 )
 
 type filterFlag []string
@@ -73,6 +74,7 @@ var (
 	enableWebSocket              = flag.Bool("websocket", false, "enable websocket")
 	enableJSPlugin               = flag.Bool("js", false, "enable js plugin")
 	disableHeaderNameNormalizing = flag.Bool("disable-header-normalizing", false, "disable normalizing header name")
+	addrYos                      = flag.String("addr-yos", "172.16.3.13:6058", "Addr: yos address")
 )
 
 func init() {
@@ -105,6 +107,12 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	} else {
 		runtime.GOMAXPROCS(*limitCpus)
+	}
+
+	// 初始化 yos 客户端
+	err := remote.InitYosClient(*addrYos)
+	if err != nil {
+		log.Errorf("init yos client error, err: %+v\n", err)
 	}
 
 	if *addrPPROF != "" {

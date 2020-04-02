@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/zhangchong5566/manba/grpcx"
+	"github.com/zhangchong5566/manba/pkg/remote"
 
 	"os"
 	"os/signal"
@@ -36,7 +37,7 @@ var (
 	ui             = flag.String("ui", "/app/manba/ui/dist", "The gateway ui dist dir.")
 	uiPrefix       = flag.String("ui-prefix", "/ui", "The gateway ui prefix path.")
 	version        = flag.Bool("version", false, "Show version info")
-	addrYos        = flag.String("addr-yos", "", "Addr: yos address")
+	addrYos        = flag.String("addr-yos", "127.0.0.1:6058", "Addr: yos address")
 )
 
 func main() {
@@ -59,6 +60,7 @@ func main() {
 	log.Infof("service-prefix: %s", *servicePrefix)
 	log.Infof("publish-lease: %d", *publishLease)
 	log.Infof("publish-timeout: %d", *publishTimeout)
+	log.Infof("addr-yos: %s", *addrYos)
 
 	db, err := store.GetStoreFrom(*addrStore, fmt.Sprintf("/%s", *namespace), *addrStoreUser, *addrStorePwd)
 	if err != nil {
@@ -69,11 +71,11 @@ func main() {
 
 	service.Init(db)
 
-	//// 初始化 yos 客户端
-	//err = remote.InitYosClient(*addrYos)
-	//if err != nil {
-	//	log.Errorf("init yos client error, err: %+v\n", err)
-	//}
+	// 初始化 yos 客户端
+	err = remote.InitYosClient(*addrYos)
+	if err != nil {
+		log.Errorf("init yos client error, err: %+v\n", err)
+	}
 
 	var opts []grpcx.ServerOption
 	if *discovery {

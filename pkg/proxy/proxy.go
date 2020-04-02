@@ -3,22 +3,26 @@ package proxy
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	uuid "github.com/satori/go.uuid"
+	"github.com/zhangchong5566/manba/pkg/errordef"
 	"net"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/fagongzi/log"
+	"github.com/fagongzi/util/hack"
+	"github.com/fagongzi/util/task"
+	"github.com/valyala/fasthttp"
 	"github.com/zhangchong5566/manba/pkg/expr"
 	"github.com/zhangchong5566/manba/pkg/filter"
 	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/zhangchong5566/manba/pkg/plugin"
 	"github.com/zhangchong5566/manba/pkg/store"
 	"github.com/zhangchong5566/manba/pkg/util"
-	"github.com/fagongzi/log"
-	"github.com/fagongzi/util/hack"
-	"github.com/fagongzi/util/task"
-	"github.com/valyala/fasthttp"
 )
 
 var (
@@ -474,6 +478,13 @@ func (p *Proxy) doProxy(dn *dispatchNode, adjustH func(*proxyContext)) {
 
 	var res *fasthttp.Response
 	times := int32(0)
+
+	requestId := string(forwardReq.Header.Peek("request-id"))
+	if requestId == "" {
+		requestId = genRequestID()
+		forwardReq.Header.Set("request-id", requestId)
+	}
+
 	for {
 		log.Infof("%s: dispatch node %d sent for %d times",
 			dn.requestTag,
@@ -489,8 +500,23 @@ func (p *Proxy) doProxy(dn *dispatchNode, adjustH func(*proxyContext)) {
 			}
 		} else if svr.meta.Protocol == metapb.Grpc {
 
-
+			grpcRes, err := p.dispatcher.grpcEnter.Call(svr.meta.Addr, svr.meta.GrpcService, dn.api.meta.GrpcMethod, string(forwardReq.Body()))
+			log.Infof("grpcEnter.Call, request: service=%s, method=%s", svr.meta.GrpcService, dn.api.meta.GrpcMethod)
+			log.Infof("forwardReq.Body=%+v", string(forwardReq.Body()))
+			log.Infof("grpcRes=%+v", grpcRes)
+			res = fasthttp.AcquireResponse()
+			res.Reset()
+			res.Header.Add("Content-Type", "application/json")
+			res.SetStatusCode(200)
+			if err != nil {
+				//error返回内部错误
+				log.Errorf("grpcEnter.Call error, request: service=%s, method=%s,error=%s", svr.meta.GrpcService, dn.api.meta.GrpcMethod, err)
+				res.SetBodyString(grpcApiError(fmt.Sprintf("%d", errordef.ErrInner), errordef.GetErrorMessage(errordef.ErrInner), requestId))
+			} else {
+				res.SetBodyString(grpcApiResult(grpcRes.Data, requestId))
+			}
 		}
+
 		c.setEndAt(time.Now())
 
 		times++
@@ -598,4 +624,55 @@ func (p *Proxy) doProxy(dn *dispatchNode, adjustH func(*proxyContext)) {
 
 func getIndex(opt *uint64, size uint64) int {
 	return int(atomic.AddUint64(opt, 1) % size)
+}
+
+// 生成唯一请求ID
+func genRequestID() string {
+	return fmt.Sprintf("%s", uuid.NewV4())
+}
+
+func grpcApiResult(data, requestId string) (result string) {
+
+	resultMap := make(map[string]interface{}, 0)
+
+	var dataMap map[string]interface{}
+	if err := json.Unmarshal([]byte(data), &dataMap); err != nil {
+		log.Errorf("json.Unmarshal err, error=%+v", err)
+		if strings.Contains(data, "-") {
+			resultMap["code"] = data[0:strings.Index(data, "-")]
+			resultMap["message"] = data[strings.Index(data, "-")+1:]
+		} else {
+			resultMap["code"] = fmt.Sprintf("%d", errordef.ErrInner)
+			resultMap["message"] = data
+		}
+		resultMap["requestID"] = requestId
+	} else {
+		resultMap["code"] = "0000"
+		resultMap["message"] = "操作成功"
+		resultMap["data"] = dataMap
+		resultMap["requestID"] = requestId
+	}
+
+	resultByte, err := json.Marshal(resultMap)
+	if err != nil {
+		return
+	}
+	result = string(resultByte)
+	return
+}
+
+func grpcApiError(errCode, errMessage, requestId string) (result string) {
+
+	resultMap := make(map[string]interface{}, 0)
+	resultMap["code"] = errCode
+	resultMap["message"] = errMessage
+	resultMap["requestID"] = requestId
+
+	resultByte, err := json.Marshal(resultMap)
+	if err != nil {
+		return
+	}
+	result = string(resultByte)
+
+	return
 }

@@ -91,6 +91,12 @@ func (ab *APIBuilder) MatchDomain(domain string) *APIBuilder {
 	return ab
 }
 
+// GrpcMethod set grpcMethod
+func (ab *APIBuilder) GrpcMethod(grpcMethod string) *APIBuilder {
+	ab.value.GrpcMethod = grpcMethod
+	return ab
+}
+
 // UP up this api
 func (ab *APIBuilder) UP() *APIBuilder {
 	ab.value.Status = metapb.Up

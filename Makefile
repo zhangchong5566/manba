@@ -65,12 +65,14 @@ docker:
 
 .PHONY: ui
 ui: ; $(info ======== compile ui:)
-	git clone https://github.com/fagongzi/gateway-ui-vue.git $(DIST_DIR)ui
-	cd $(DIST_DIR)ui && git checkout 3.0.0
+	rm -rf $(DIST_DIR)ui
+	cp -R /Users/yunzhanghu_bj537/Work/gowork/src/github.com/zhangchong5566/gateway-ui-vue $(DIST_DIR)ui
+    #git clone https://github.com/zhangchong5566/gateway-ui-vue.git $(DIST_DIR)ui
+	#cd $(DIST_DIR)ui && git checkout DEV
 
-.PHONY: darwin
-darwin:
-	$(eval GOOS := darwin)
+# .PHONY: darwin
+# darwin:
+# 	$(eval GOOS := darwin)
 
 .PHONY: apiserver
 apiserver: ; $(info ======== compiled apiserver:)

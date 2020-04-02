@@ -1,13 +1,19 @@
 package proxy
 
 import (
+	"context"
 	"errors"
+	"fmt"
+	"github.com/zhangchong5566/manba/pkg/grpcall"
+	"github.com/zhangchong5566/manba/pkg/remote"
+	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/fagongzi/log"
 	"github.com/zhangchong5566/manba/pkg/pb/metapb"
 	"github.com/zhangchong5566/manba/pkg/plugin"
 	"github.com/zhangchong5566/manba/pkg/util"
-	"github.com/fagongzi/log"
 )
 
 var (
@@ -18,6 +24,7 @@ var (
 	errProxyExists     = errors.New("Proxy already exist")
 	errPluginExists    = errors.New("Plugin already exist")
 	errRoutingExists   = errors.New("Routing already exist")
+	errProtoSetExists   = errors.New("ProtoSet already exist")
 	errServerNotFound  = errors.New("Server not found")
 	errClusterNotFound = errors.New("Cluster not found")
 	errBindNotFound    = errors.New("Bind not found")
@@ -25,6 +32,7 @@ var (
 	errAPINotFound     = errors.New("API not found")
 	errRoutingNotFound = errors.New("Routing not found")
 	errPluginNotFound  = errors.New("Plugin not found")
+	errProtoSetNotFound = errors.New("ProtoSet not found")
 
 	limit = int64(32)
 )
@@ -37,9 +45,11 @@ func (r *dispatcher) load() {
 	r.loadServers()
 	r.loadBinds()
 	r.loadAPIs()
+	r.loadProtoSets()
 	r.loadRoutings()
 	r.loadPlugins()
 	r.loadAppliedPlugins()
+	r.loadProtoSets()
 }
 
 func (r *dispatcher) loadProxies() {
@@ -650,4 +660,156 @@ func (r *dispatcher) inAppliedPlugins(id uint64) bool {
 	}
 
 	return false
+}
+
+func (r *dispatcher) loadProtoSets() {
+	log.Infof("load protoSets")
+
+	err := r.store.GetProtoSetFiles(limit, func(value interface{}) error {
+		return r.addProtoSetFile(value.(*metapb.ProtoSetFile))
+	})
+	if nil != err {
+		log.Errorf("load protoSets failed, errors:\n%+v",
+			err)
+		return
+	}
+}
+
+func (r *dispatcher) addProtoSetFile(protosetFile *metapb.ProtoSetFile) error {
+	if _, ok := r.protoSetFiles[protosetFile.ID]; ok {
+		return errProtoSetExists
+	}
+
+	newValues := r.copyProtoSetFile(0)
+	newValues[protosetFile.ID] = newProtoSetFileRuntime(protosetFile)
+
+	// 下载protoset文件
+	protoSetFile, err := downloadProtoSetFile(protosetFile.FileId, protosetFile.FileName)
+	if err != nil {
+		log.Errorf("downloadProtoSetFile err, fileId=%s, fileName=%s, err=%s", protosetFile.ID,
+			protosetFile.FileName, err)
+		return err
+	}
+
+	// 加载protoset
+	err = loadProtoSetEngineHandler(r.grpcEnter, protoSetFile)
+	if err != nil {
+		log.Errorf("loadProtoSetEngineHandler err, fileId=%s, fileName=%s, err=%s", protosetFile.ID,
+			protosetFile.FileName, err)
+		return err
+	}
+
+	r.protoSetFiles = newValues
+	log.Infof("ProtoSet <%d> added, data <%s>",
+		protosetFile.ID,
+		protosetFile.String())
+
+	return nil
+}
+
+func (r *dispatcher) updateProtoSetFile(meta *metapb.ProtoSetFile) error {
+	_, ok := r.protoSetFiles[meta.ID]
+	if !ok {
+		return errProtoSetNotFound
+	}
+
+	newValues := r.copyProtoSetFile(0)
+	rt := newValues[meta.ID]
+	rt.updateMeta(meta)
+
+	// 下载protoset文件
+	protoSetFile, err := downloadProtoSetFile(meta.FileId, meta.FileName)
+	if err != nil {
+		log.Errorf("downloadProtoSetFile err, fileId=%s, fileName=%s, err=%s", meta.ID,
+			meta.FileName, err)
+		return err
+	}
+
+	// 加载protoset
+	err = loadProtoSetEngineHandler(r.grpcEnter, protoSetFile)
+	if err != nil {
+		log.Errorf("loadProtoSetEngineHandler err, fileId=%s, fileName=%s, err=%s", meta.ID,
+			meta.FileName, err)
+		return err
+	}
+
+	r.protoSetFiles = newValues
+	log.Infof("ProtoSet <%d> updated, data <%s>",
+		meta.ID,
+		meta.String())
+
+	return nil
+}
+
+
+// TODO: 删除protoset文件暂未实现
+func (r *dispatcher) removeProtoSetFile(id uint64) error {
+	value, ok := r.protoSetFiles[id]
+	if !ok {
+		return errProtoSetNotFound
+	}
+
+	delete(r.protoSetFiles, id)
+
+	log.Infof("ProtoSet <%d/%s:%s> removed",
+		value.meta.ID,
+		value.meta.Name,
+		value.meta.Version)
+	return nil
+}
+
+func downloadProtoSetFile(fileId, fileName string) (protoSetFilePath string, err error) {
+	fn := "proxy.downloadProtoSetFile"
+
+	savePath, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Errorf("[%s] filepath.Abs error, fileId=%s, fildName=%s, err=%+v", fn, fileId, fileName, err)
+	}
+
+	fileBytes, err := remote.DownloadFile(context.TODO(), fileId)
+	if err != nil {
+		log.Errorf("[%s] remote.DownloadFile error, fileId=%s, fildName=%s, err=%+v", fn, fileId, fileName, err)
+	}
+
+	savePath = fmt.Sprintf("%s/protoset", savePath)
+	if !util.FileIsExist(savePath) {
+		errLocal := os.Mkdir(savePath, os.ModePerm)
+		if errLocal != nil {
+			log.Errorf("[%s] os.Mkdir os.Mkdir, savePath=%s, err=%+v", fn, savePath, errLocal)
+			err = errLocal
+			return
+		}
+	}
+	protoSetFilePath = fmt.Sprintf("%s/%s_%s", savePath, fileId, fileName)
+	log.Infof("[%s] download ProtoSet FilePath: %s", fn, protoSetFilePath)
+
+	err = util.WriteToFile(protoSetFilePath, fileBytes)
+	if err !=  nil {
+		log.Errorf("[%s] util.WriteToFile error, fileId=%s, fildName=%s, err=%+v", fn, fileId, fileName, err)
+		return
+	}
+
+	return
+}
+
+// loadProtoSetEngineHandler 加载protoset文件
+func loadProtoSetEngineHandler(grpcEnter *grpcall.EngineHandler, protosetFiles ...string) (err error) {
+	fn := "proxy.loadProtoSetEngineHandler"
+	for _, file := range protosetFiles {
+		_, errLocal := grpcall.SetProtoSetFiles(file)
+		if errLocal != nil {
+			log.Errorf("[%s] grpcall.SetProtoSetFiles err=%v\n", fn, errLocal)
+			err = errLocal
+			return
+		}
+	}
+	err = grpcall.InitDescSource()
+	if err != nil {
+		log.Errorf("[%s] grpcall.InitDescSource err=%v\n", fn, err)
+		return
+	}
+
+	grpcEnter.Init()
+
+	return
 }

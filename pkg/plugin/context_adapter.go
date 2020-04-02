@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/zhangchong5566/manba/pkg/filter"
 	"github.com/fagongzi/util/hack"
 	"github.com/valyala/fasthttp"
+	"github.com/zhangchong5566/manba/pkg/filter"
 )
 
 var (
